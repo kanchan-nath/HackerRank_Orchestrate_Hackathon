@@ -3,6 +3,7 @@ Step 4 — Enumerate eligible payment plans and rank them.
 
 Deterministic plan selection logic — no LLM calls.
 """
+import re
 
 from datetime import date, timedelta
 from typing import Dict, List, Optional, Tuple, Any
@@ -83,6 +84,11 @@ def rank_plans(plans: List[dict], desired_completion_date: date) -> List[dict]:
         # 5. Fewer payments
         n_payments = plan.get("number_of_payments", 999)
         # 6. Lowest option ID
+
+        opt_id_raw = plan.get("payment_option_id", "")
+        nums = re.findall(r'\d+', opt_id_raw)
+        opt_num = int(nums[0]) if nums else 999999
+
         opt_id = plan.get("payment_option_id", "zzz")
 
         return (
@@ -91,7 +97,7 @@ def rank_plans(plans: List[dict], desired_completion_date: date) -> List[dict]:
             total,
             start,
             n_payments,
-            opt_id,
+            opt_num,
         )
 
     return sorted(plans, key=sort_key)
